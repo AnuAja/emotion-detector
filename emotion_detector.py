@@ -21,9 +21,6 @@ def load_dataset():
         'happy': 1,
         'sad': 2,
         'neutral': 3,
-        'fear' : 4,
-        'disgust' : 5,
-        'surprise' : 6,
     }
 
     for expression_dir in os.listdir(directory):
@@ -77,15 +74,15 @@ def build_model():
     model.add(Flatten())
     model.add(Dense(128, activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(7, activation='softmax'))
+    model.add(Dense(4, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
 
 
 # Train the emotion detection model
 def train_model(model, X_train, X_test, y_train, y_test):
-    y_train = to_categorical(y_train)
-    y_test = to_categorical(y_test)
+    y_train = to_categorical(y_train, 4)
+    y_test = to_categorical(y_test, 4)
     model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=64)
 
 
@@ -97,7 +94,7 @@ def detect_emotions(model, image):
     image = np.reshape(image, (1, 48, 48, 1))
 
     predictions = model.predict(image)
-    emotion_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
+    emotion_labels = ['Angry', 'Happy', 'Sad', 'Neutral']
     predicted_label = emotion_labels[np.argmax(predictions)]
     confidence = np.max(predictions)
 
@@ -125,7 +122,6 @@ if __name__ == "__main__":
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-
-# Release the camera and close the windows
+    # Release the camera and close the windows
     cap.release()
     cv2.destroyAllWindows()
